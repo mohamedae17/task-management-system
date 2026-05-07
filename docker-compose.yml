@@ -1,0 +1,82 @@
+name: taskmgmt
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: taskmgmt-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${DB_PASSWORD:-Your_password123}"
+      MSSQL_PID: "Developer"
+    ports:
+      - "${DB_PORT:-1433}:1433"
+    volumes:
+      - taskmgmt-db-data:/var/opt/mssql
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -No -Q 'SELECT 1' || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: taskmgmt-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=TaskManagementDb;User Id=sa;Password=${DB_PASSWORD:-Your_password123};TrustServerCertificate=True;MultipleActiveResultSets=True"
+      Jwt__Issuer: "TaskManagement.Api"
+      Jwt__Audience: "TaskManagement.Client"
+      Jwt__SigningKey: "${JWT_SIGNING_KEY:-CHANGE_ME_dev_only_signing_key_at_least_32_chars}"
+      Jwt__AccessTokenMinutes: "30"
+      Jwt__RefreshTokenDays: "14"
+      Email__Mode: "PickupDirectory"
+      Email__PickupPath: "/app/mail-pickup"
+      FileStorage__Root: "/app/uploads"
+      Cors__AllowedOrigins__0: "http://localhost:${WEB_PORT:-4200}"
+    ports:
+      - "${API_PORT:-5080}:8080"
+    volumes:
+      - taskmgmt-uploads:/app/uploads
+      - taskmgmt-mail:/app/mail-pickup
+      - taskmgmt-logs:/app/logs
+
+  api-seed:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: taskmgmt-api-seed
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=TaskManagementDb;User Id=sa;Password=${DB_PASSWORD:-Your_password123};TrustServerCertificate=True;MultipleActiveResultSets=True"
+      Jwt__Issuer: "TaskManagement.Api"
+      Jwt__Audience: "TaskManagement.Client"
+      Jwt__SigningKey: "${JWT_SIGNING_KEY:-CHANGE_ME_dev_only_signing_key_at_least_32_chars}"
+    profiles: [ "seed" ]
+    entrypoint: ["dotnet", "TaskManagement.Api.dll", "--seed"]
+    restart: "no"
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    container_name: taskmgmt-web
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT:-4200}:80"
+
+volumes:
+  taskmgmt-db-data:
+  taskmgmt-uploads:
+  taskmgmt-mail:
+  taskmgmt-logs:

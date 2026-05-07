@@ -17,7 +17,8 @@ public class Result
 
     public static Result Failure(params string[] errors) => new(false, errors, null);
 
-    public static Result Failure(string errorCode, params string[] errors) =>
+    // Distinct method name to avoid the params-overload ambiguity with Failure(string, ...).
+    public static Result FailureWithCode(string errorCode, params string[] errors) =>
         new(false, errors, errorCode);
 }
 
@@ -36,6 +37,6 @@ public sealed class Result<T> : Result
     public new static Result<T> Failure(params string[] errors) =>
         new(default, false, errors, null);
 
-    public new static Result<T> Failure(string errorCode, params string[] errors) =>
+    public new static Result<T> FailureWithCode(string errorCode, params string[] errors) =>
         new(default, false, errors, errorCode);
 }

@@ -51,7 +51,8 @@ public sealed class GlobalExceptionMiddleware
         context.Response.Clear();
         context.Response.StatusCode = status;
         context.Response.ContentType = "application/problem+json";
-        await context.Response.WriteAsync(JsonSerializer.Serialize(problem, JsonOptions));
+        // Serialize using the runtime type so ValidationProblemDetails.Errors isn't dropped.
+        await context.Response.WriteAsync(JsonSerializer.Serialize(problem, problem.GetType(), JsonOptions));
     }
 
     private (int Status, ProblemDetails Problem) MapException(Exception ex, HttpContext context)
