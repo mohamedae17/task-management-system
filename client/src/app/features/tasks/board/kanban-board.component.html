@@ -1,0 +1,54 @@
+<div class="tm-page board-page">
+  <header class="tm-page-header">
+    <mat-icon style="font-size: 32px; width: 32px; height: 32px;">view_kanban</mat-icon>
+    <h1>Kanban Board</h1>
+    <span class="spacer"></span>
+    <a mat-stroked-button routerLink="/tasks">
+      <mat-icon>list</mat-icon>
+      List
+    </a>
+    <a mat-flat-button color="primary" routerLink="/tasks/new">
+      <mat-icon>add</mat-icon>
+      New task
+    </a>
+  </header>
+
+  @if (loading()) { <mat-progress-bar mode="indeterminate" /> }
+
+  <div class="board" cdkDropListGroup>
+    @for (status of columns; track status) {
+      <section class="column" [attr.data-status]="status">
+        <header>
+          <h3>{{ columnLabels[status] }}</h3>
+          <span class="count">{{ byColumn(status).length }}</span>
+        </header>
+
+        <div
+          class="column-list"
+          cdkDropList
+          [id]="'column-' + status"
+          [cdkDropListData]="byColumn(status)"
+          [cdkDropListConnectedTo]="columnIds()"
+          (cdkDropListDropped)="drop($event, status)">
+          @for (task of byColumn(status); track task.id) {
+            <article class="task-card" cdkDrag (click)="open(task)">
+              <div class="task-card-title">{{ task.title }}</div>
+              <div class="task-card-meta">
+                <span class="priority-dot" [matTooltip]="priorityLabels[task.priority]" [style.background]="priorityColors[task.priority]"></span>
+                @if (task.dueDate) {
+                  <span class="due"><mat-icon>event</mat-icon>{{ task.dueDate | date: 'shortDate' }}</span>
+                }
+                @if (task.assigneeName) {
+                  <span class="assignee" [matTooltip]="task.assigneeName">{{ task.assigneeName }}</span>
+                }
+              </div>
+            </article>
+          }
+          @if (byColumn(status).length === 0) {
+            <p class="column-empty">Drop tasks here</p>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</div>

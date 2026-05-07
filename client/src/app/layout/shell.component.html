@@ -1,0 +1,66 @@
+<mat-sidenav-container class="shell-container">
+  <mat-sidenav
+    #sidenav
+    class="shell-sidenav"
+    mode="side"
+    [opened]="sidenavOpen()"
+    [fixedInViewport]="false">
+    <div class="brand">
+      <mat-icon>checklist</mat-icon>
+      <span>Task Mgmt</span>
+    </div>
+    <mat-divider />
+    <mat-nav-list>
+      @for (link of navLinks(); track link.path) {
+        <a
+          mat-list-item
+          [routerLink]="link.path"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="{ exact: link.path === '/tasks' || link.path === '/dashboard' }">
+          <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
+          <span matListItemTitle>{{ link.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="shell-content">
+    <mat-toolbar color="primary" class="shell-toolbar">
+      <button mat-icon-button (click)="toggleSidenav()" matTooltip="Toggle navigation">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span class="shell-title">Task Management</span>
+      <span class="spacer"></span>
+
+      <button mat-icon-button (click)="toggleTheme()" matTooltip="Toggle theme">
+        <mat-icon>{{ theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+
+      <a mat-icon-button routerLink="/notifications" matTooltip="Notifications">
+        <mat-icon [matBadge]="unreadCount() > 0 ? unreadCount() : null" matBadgeColor="warn">notifications</mat-icon>
+      </a>
+
+      <button mat-icon-button [matMenuTriggerFor]="userMenu" matTooltip="Account">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+      <mat-menu #userMenu="matMenu">
+        <div class="menu-header">
+          <strong>{{ user()?.fullName }}</strong>
+          <small>{{ user()?.email }}</small>
+        </div>
+        <mat-divider />
+        <button mat-menu-item (click)="goToProfile()">
+          <mat-icon>person</mat-icon><span>Profile</span>
+        </button>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon><span>Sign out</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <main class="shell-main">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,157 @@
+<div class="tm-page detail-page">
+  <header class="tm-page-header">
+    <a mat-icon-button routerLink="/tasks"><mat-icon>arrow_back</mat-icon></a>
+    <h1>{{ isNew() ? 'New task' : (task()?.title ?? 'Loading…') }}</h1>
+    <span class="spacer"></span>
+    @if (!isNew() && task()) {
+      <button mat-icon-button color="warn" (click)="delete()" matTooltip="Delete task">
+        <mat-icon>delete</mat-icon>
+      </button>
+    }
+  </header>
+
+  @if (loading()) { <mat-progress-bar mode="indeterminate" /> }
+
+  <div class="layout">
+    <section class="main-card">
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" maxlength="200" required>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="6" maxlength="4000"></textarea>
+        </mat-form-field>
+
+        <div class="grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              @for (s of statuses; track s) {
+                <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Priority</mat-label>
+            <mat-select formControlName="priority">
+              @for (p of priorities; track p) {
+                <mat-option [value]="p">
+                  <span class="priority-dot" [style.background]="priorityColors[p]"></span>
+                  {{ priorityLabels[p] }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Due date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="dueDate">
+            <mat-datepicker-toggle matIconSuffix [for]="picker" />
+            <mat-datepicker #picker />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Assignee</mat-label>
+            <mat-select formControlName="assigneeId">
+              <mat-option [value]="null">— Unassigned —</mat-option>
+              @for (u of assignableUsers(); track u.id) {
+                <mat-option [value]="u.id">{{ u.fullName }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Labels</mat-label>
+          <mat-select formControlName="labelIds" multiple>
+            @for (l of availableLabels(); track l.id) {
+              <mat-option [value]="l.id">
+                <span class="priority-dot" [style.background]="l.colorHex"></span>
+                {{ l.name }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <div class="actions">
+          <a mat-button routerLink="/tasks">Cancel</a>
+          <button mat-flat-button color="primary" type="submit" [disabled]="saving() || form.invalid">
+            @if (saving()) {
+              <mat-progress-spinner mode="indeterminate" diameter="20" />
+            } @else {
+              {{ isNew() ? 'Create task' : 'Save changes' }}
+            }
+          </button>
+        </div>
+      </form>
+    </section>
+
+    @if (!isNew() && task()) {
+      <aside class="meta-card">
+        <h3>Details</h3>
+        <dl>
+          <dt>Created</dt><dd>{{ task()!.createdAt | date: 'medium' }}</dd>
+          <dt>Created by</dt><dd>{{ task()!.creatorName }}</dd>
+          @if (task()!.updatedAt) {
+            <dt>Updated</dt><dd>{{ task()!.updatedAt | date: 'medium' }}</dd>
+          }
+          @if (task()!.startedAt) {
+            <dt>Started</dt><dd>{{ task()!.startedAt | date: 'medium' }}</dd>
+          }
+          @if (task()!.completedAt) {
+            <dt>Completed</dt><dd>{{ task()!.completedAt | date: 'medium' }}</dd>
+          }
+        </dl>
+
+        @if (task()!.labels.length) {
+          <h4>Labels</h4>
+          <mat-chip-set>
+            @for (l of task()!.labels; track l.id) {
+              <mat-chip [style.background]="l.colorHex" [style.color]="'white'">{{ l.name }}</mat-chip>
+            }
+          </mat-chip-set>
+        }
+      </aside>
+    }
+  </div>
+
+  @if (!isNew() && task()) {
+    <section class="comments">
+      <h3>Comments ({{ comments().length }})</h3>
+
+      <div class="comment-list">
+        @for (c of comments(); track c.id) {
+          <article class="comment">
+            <div class="comment-head">
+              <strong>{{ c.authorName }}</strong>
+              <span class="when">{{ c.createdAt | date: 'medium' }}</span>
+              @if (c.isEdited) { <span class="edited">edited</span> }
+              <span class="spacer"></span>
+              <button mat-icon-button (click)="deleteComment(c)" matTooltip="Delete">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+            <p>{{ c.content }}</p>
+          </article>
+        }
+        @if (comments().length === 0) {
+          <p class="empty">Be the first to comment.</p>
+        }
+      </div>
+
+      <form [formGroup]="commentForm" (ngSubmit)="postComment()" class="comment-form">
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Add a comment</mat-label>
+          <textarea matInput formControlName="content" rows="3" maxlength="4000"></textarea>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="submit" [disabled]="commentForm.invalid">
+          <mat-icon>send</mat-icon> Post
+        </button>
+      </form>
+    </section>
+  }
+</div>

@@ -1,0 +1,117 @@
+<div class="tm-page">
+  <header class="tm-page-header">
+    <mat-icon style="font-size: 32px; width: 32px; height: 32px;">dashboard</mat-icon>
+    <h1>Dashboard</h1>
+  </header>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  } @else if (stats(); as s) {
+    <section class="tm-card-grid">
+      <mat-card>
+        <mat-card-content>
+          <div class="stat-label">Total tasks</div>
+          <div class="stat-value">{{ s.totalTasks | number }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-content>
+          <div class="stat-label">Open</div>
+          <div class="stat-value">{{ s.openTasks | number }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-content>
+          <div class="stat-label">Completed</div>
+          <div class="stat-value">{{ s.completedTasks | number }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="warn">
+        <mat-card-content>
+          <div class="stat-label">Overdue</div>
+          <div class="stat-value">{{ s.overdueTasks | number }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-content>
+          <div class="stat-label">Due this week</div>
+          <div class="stat-value">{{ s.dueThisWeek | number }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-content>
+          <div class="stat-label">My open tasks</div>
+          <div class="stat-value">{{ s.myOpenTasks | number }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-content>
+          <div class="stat-label">Unread notifications</div>
+          <div class="stat-value">{{ s.unreadNotifications | number }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-content>
+          <div class="stat-label">Active users</div>
+          <div class="stat-value">{{ s.activeUsers | number }} <small>/ {{ s.totalUsers }}</small></div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <section class="charts-row">
+      <mat-card>
+        <mat-card-header><mat-card-title>Tasks by status</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <div class="chart-host">
+            <canvas baseChart [data]="statusChartData()" [type]="statusChartType" [options]="chartOptions"></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card>
+        <mat-card-header><mat-card-title>Open tasks by priority</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <div class="chart-host">
+            <canvas baseChart [data]="priorityChartData()" [type]="priorityChartType" [options]="chartOptions"></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <section class="productivity">
+      <mat-card>
+        <mat-card-header><mat-card-title>Top contributors</mat-card-title></mat-card-header>
+        <mat-card-content>
+          @if (productivity().length === 0) {
+            <p class="empty">No assignment activity yet.</p>
+          } @else {
+            <table mat-table [dataSource]="productivity()" class="full-width">
+              <ng-container matColumnDef="fullName">
+                <th mat-header-cell *matHeaderCellDef>User</th>
+                <td mat-cell *matCellDef="let row">{{ row.fullName }}</td>
+              </ng-container>
+              <ng-container matColumnDef="assignedTasks">
+                <th mat-header-cell *matHeaderCellDef>Assigned</th>
+                <td mat-cell *matCellDef="let row">{{ row.assignedTasks }}</td>
+              </ng-container>
+              <ng-container matColumnDef="completedTasks">
+                <th mat-header-cell *matHeaderCellDef>Completed</th>
+                <td mat-cell *matCellDef="let row">{{ row.completedTasks }}</td>
+              </ng-container>
+              <ng-container matColumnDef="overdueTasks">
+                <th mat-header-cell *matHeaderCellDef>Overdue</th>
+                <td mat-cell *matCellDef="let row">{{ row.overdueTasks }}</td>
+              </ng-container>
+              <ng-container matColumnDef="completionRate">
+                <th mat-header-cell *matHeaderCellDef>Completion</th>
+                <td mat-cell *matCellDef="let row">{{ row.completionRate | percent: '1.0-0' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="productivityColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: productivityColumns"></tr>
+            </table>
+          }
+        </mat-card-content>
+      </mat-card>
+    </section>
+  }
+</div>

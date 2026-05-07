@@ -1,0 +1,62 @@
+.shell-container {
+  height: 100vh;
+}
+
+.shell-sidenav {
+  width: 240px;
+  border-right: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container-low);
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--mat-sys-primary);
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  .active-link {
+    background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+
+    mat-icon, [matListItemTitle] {
+      color: var(--mat-sys-primary);
+    }
+  }
+}
+
+.shell-content { display: flex; flex-direction: column; }
+
+.shell-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.shell-title { font-weight: 500; }
+
+.shell-main {
+  flex: 1 1 auto;
+  overflow: auto;
+  background: var(--mat-sys-surface);
+}
+
+.menu-header {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  small { color: var(--mat-sys-on-surface-variant); }
+}
+
+@media (max-width: 720px) {
+  .shell-sidenav { width: 220px; }
+}
