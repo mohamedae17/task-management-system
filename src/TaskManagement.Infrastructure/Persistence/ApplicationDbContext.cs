@@ -19,6 +19,11 @@ public class ApplicationDbContext
         _interceptors = interceptors.ToArray();
     }
 
+    // IdentityDbContext.Users is non-virtual; expose via the explicit interface implementation
+    // so handlers can resolve Users through IApplicationDbContext without crossing the Identity
+    // Manager boundary for read scenarios.
+    DbSet<AppUser> IApplicationDbContext.Users => Users;
+
     public DbSet<TaskItem> Tasks => Set<TaskItem>();
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<Attachment> Attachments => Set<Attachment>();

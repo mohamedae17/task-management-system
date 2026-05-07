@@ -5,6 +5,7 @@ namespace TaskManagement.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
+    DbSet<AppUser> Users { get; }
     DbSet<TaskItem> Tasks { get; }
     DbSet<Comment> Comments { get; }
     DbSet<Attachment> Attachments { get; }
