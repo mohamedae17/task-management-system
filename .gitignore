@@ -1,0 +1,76 @@
+# ---- .NET ----
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Ll]og/
+[Ll]ogs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+.vs/
+.vscode/
+*.cache
+*.swp
+*.pidb
+*.bak
+*.exe
+*.dll
+*.pdb
+*.publishsettings
+PublishProfiles/
+publish/
+artifacts/
+
+# EF Core
+*.mdf
+*.ldf
+*.ndf
+
+# Rider
+.idea/
+*.sln.iml
+
+# ---- Node / Angular ----
+node_modules/
+dist/
+tmp/
+.angular/
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ---- Env ----
+.env
+.env.*
+!.env.example
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Docker ----
+docker-compose.override.yml
+
+# ---- Local secrets ----
+secrets/
+*.pfx
+*.key
+appsettings.Local.json
+appsettings.Development.local.json
+
+# ---- Claude Code local state ----
+.claude/
