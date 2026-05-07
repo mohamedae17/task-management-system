@@ -5,7 +5,7 @@ import {
   isDevMode,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
-  provideZoneChangeDetection
+  provideZonelessChangeDetection
 } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
@@ -28,7 +28,8 @@ import * as uiEffects from './store/ui/ui.effects';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    // Angular 21 ships zoneless by default — no zone.js polyfill is loaded.
+    provideZonelessChangeDetection(),
     provideAnimations(),
     provideRouter(
       routes,
@@ -42,7 +43,7 @@ export const appConfig: ApplicationConfig = {
       [uiFeature.name]: uiFeature.reducer
     }),
     provideEffects(authEffects, notificationsEffects, uiEffects),
-    provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode(), connectInZone: true }),
+    provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideCharts(withDefaultRegisterables()),
 
     // Hydrate the auth slice from local storage on app start so guards see the right state.
