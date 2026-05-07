@@ -40,7 +40,7 @@ Production-ready task management platform built with **ASP.NET Core 8** (Clean A
 
 - [x] **Turn 1** — Solution scaffold, Domain layer, thin Application layer, Infrastructure (DbContext, EF configurations, generic repository, UnitOfWork, auditing interceptor, soft delete, seeder), minimal API host so EF migrations run, initial EF migration.
 - [x] **Turn 2** — Application layer: MediatR commands/queries for Auth, Users, Tasks, Comments, Notifications, Labels, Dashboard; FluentValidation; AutoMapper profiles; pipeline behaviors (validation/logging/performance/exception); abstractions for JWT, identity, email, SignalR notifications, file storage, activity logging.
-- [ ] **Turn 3** — API layer: controllers, JWT middleware, SignalR hubs, Swagger, global exception middleware, Serilog wiring.
+- [x] **Turn 3** — API layer: controllers (Auth/Users/Tasks/Comments/Notifications/Labels/Dashboard), JWT bearer auth + role policies, SignalR notifications hub, Swagger with JWT support, ProblemDetails-based exception middleware, Serilog request logging + rolling file sink, CORS. Infrastructure implementations of all Application abstractions (JwtService with refresh-token rotation, IdentityService, MailKit email sender with PickupDirectory dev mode, local file storage, activity logger).
 - [ ] **Turn 4** — Angular frontend (Material + NgRx + Kanban + charts).
 - [ ] **Turn 5** — Docker setup, tests, deployment docs.
 

@@ -6,11 +6,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TaskManagement.Application.Common.Interfaces;
 using TaskManagement.Domain.Entities;
+using TaskManagement.Infrastructure.Auditing;
+using TaskManagement.Infrastructure.Authentication;
+using TaskManagement.Infrastructure.Email;
+using TaskManagement.Infrastructure.Identity;
 using TaskManagement.Infrastructure.Persistence;
 using TaskManagement.Infrastructure.Persistence.Interceptors;
 using TaskManagement.Infrastructure.Persistence.Repositories;
 using TaskManagement.Infrastructure.Persistence.Seed;
 using TaskManagement.Infrastructure.Services;
+using TaskManagement.Infrastructure.Storage;
 
 namespace TaskManagement.Infrastructure;
 
@@ -35,9 +40,6 @@ public static class DependencyInjection
                 sql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
                 sql.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null);
             });
-
-            // Interceptors are passed via the DbContext constructor (IEnumerable<ISaveChangesInterceptor>)
-            // so they participate in DI scope and can resolve ICurrentUserService.
         });
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
@@ -60,9 +62,27 @@ public static class DependencyInjection
             .AddRoles<AppRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
-        // SignInManager + authentication scheme registration are wired up in the API layer
-        // alongside JWT bearer auth. Keeping them out of Infrastructure avoids forcing every
-        // consumer (e.g. background workers) to register an auth scheme provider.
+
+        // Options binding
+        services.AddOptions<JwtOptions>()
+            .Bind(configuration.GetSection(JwtOptions.SectionName))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.SigningKey) && o.SigningKey.Length >= 32,
+                "Jwt:SigningKey must be configured and at least 32 characters long.")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.Issuer) && !string.IsNullOrWhiteSpace(o.Audience),
+                "Jwt:Issuer and Jwt:Audience must be configured.");
+
+        services.AddOptions<EmailOptions>()
+            .Bind(configuration.GetSection(EmailOptions.SectionName));
+
+        services.AddOptions<FileStorageOptions>()
+            .Bind(configuration.GetSection(FileStorageOptions.SectionName));
+
+        // Application abstractions ↦ Infrastructure implementations
+        services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IEmailSender, MailKitEmailSender>();
+        services.AddScoped<IFileStorageService, LocalFileStorageService>();
+        services.AddScoped<IActivityLogger, ActivityLogger>();
 
         services.AddScoped<DatabaseSeeder>();
 
